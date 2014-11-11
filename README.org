@@ -1,0 +1,191 @@
+#+TITLE:       utilities.binary-dump README
+#+AUTHOR:      Jan Moringen
+#+EMAIL:       jmoringe@techfak.uni-bielefeld.de
+#+DESCRIPTION: Functions for formatting binary data
+#+KEYWORDS:    binary, hex, octal, dump, print, utilities, od
+#+LANGUAGE:    en
+
+* Introduction
+  The =utilities.binary-dump= system provides functions for formatting
+  binary data in some of the ways supported by the od(1) UNIX program.
+* STARTED Tutorial
+  #+begin_src lisp :results none :exports none :session "doc"
+    (ql:quickload '(:utilities.binary-dump :alexandria :split-sequence))
+  #+end_src
+
+  Naming convention note: number of bits is called "length" (to match
+  =cl:integer-length=).
+
+  #+begin_src lisp :results output :exports both :session "doc"
+    (utilities.binary-dump:binary-dump (nibbles:octet-vector 1 15 255 65) :base 16)
+  #+end_src
+
+  #+RESULTS:
+  : 01 0F FF 41                                           ...A
+
+  Slightly more interesting example:
+  #+begin_src lisp :results output :exports both :session "doc"
+    (let ((buffer (nibbles:make-octet-vector 1024)))
+      (with-open-file (stream "/dev/urandom" :element-type '(unsigned-byte 8))
+        (read-sequence buffer stream))
+      (utilities.binary-dump:binary-dump buffer :base 16 :offset-base 16))
+  #+end_src
+
+  #+RESULTS:
+  : 00 6A 6F 16 97 76 9B E7 35 9A 79 01 E1 A2 8E A1 9A 85 jo..v..5.y.......
+  : 11 E6 2C 41 4B 79 53 AD 70 69 0C 62 5A 3E 48 A9 C5 DB .,AKyS.pi.bZ>H...
+  : 22 BB 8C 3C 23 F0 9C 40 81 6E CF 9D 4C 3E DE B2 2F 6E ..<#..@.n..L>../n
+  : 33 AD 1B 56 D6 7F 3B 12 42 3B D4 A5 CF F1 5A EF 5B 49 ..V..;.B;....Z.[I
+  : 44 E2 EA 3A D7 66 C0 93 90 2B 08 DC 6F 12 2B A9 F6 34 ..:.f...+..o.+..4
+  : 55 F3 40 C0 7D 8B C6 CD BA 5A 9C 6C 0E AD 31 ..       .@.}....Z.l..1.
+
+* STARTED Dictionary
+  #+begin_src lisp :results none :exports none :session "doc"
+    (ql:quickload '(:utilities.binary-dump :alexandria :split-sequence))
+    (defun doc (symbol kind)
+      (let* ((lambda-list (sb-introspect:function-lambda-list symbol))
+             (string      (documentation symbol kind))
+             (lines       (split-sequence:split-sequence #\Newline string))
+             (trimmed     (mapcar (alexandria:curry #'string-left-trim '(#\Space)) lines)))
+        (format nil "~(~A~) ~{~A~^ ~}~2%~{~A~^~%~}" symbol lambda-list trimmed)))
+  #+end_src
+
+** STARTED Access Functions
+   #+begin_src lisp :exports results :session "doc"
+     (doc 'utilities.binary-dump:map-units 'function)
+   #+end_src
+
+   #+RESULTS:
+   #+begin_example
+   map-units FUNCTION DATA LENGTH ENDIAN TYPE &KEY (START 0) (END (LENGTH DATA))
+
+   Call FUNCTION on subsequent "units" in DATA.
+
+   Units are subsequences characterized by and interpreted according
+   to LENGTH, ENDIAN and TYPE:
+
+   * LENGTH specifies the number of bits in each unit. Must be 8, 16,
+   32 or 64 if TYPE is [un]signed-byte and 32 or 64 if TYPE is
+   `float'.
+
+   * ENDIAN specifies the endianess for the interpretation of the
+   unit. Possible values: the keywords `:little' and `:big'.
+
+   * TYPE specifies the type for the interpretation of the
+   unit. Possible value: the symbols `unsigned-byte', `signed-byte'
+   and `float'
+#+end_example
+
+   #+begin_src lisp :exports results :session "doc"
+     (doc 'utilities.binary-dump:map-chunks 'function)
+   #+end_src
+
+   #+RESULTS:
+   #+begin_example
+   map-chunks FUNCTION DATA CHUNK-LENGTH &KEY (START 0) (END (LENGTH DATA))
+
+   Call FUNCTION with subsequent chunks of CHUNK-LENGTH octets of DATA.
+
+   FUNCTION has to have a lambda-list compatible to the following one:
+
+   (offset data start end last-chunk?)
+
+   where
+
+   * OFFSET is the offset in octets of the current chunk relative to
+   the beginning of DATA.
+
+   * DATA passed through unmodified.
+
+   * START and END are the offset in octets of the beginning and end
+   of the current chunk relative to the beginning of DATA
+   respectively.
+
+   * LAST-CHUNK? is true when the current chunk is the last in DATA.
+
+   The last chunk may be shorter than CHUNK-LENGTH.
+
+   When supplied, START and/or END select a subsequence of DATA for
+   processing.
+#+end_example
+
+** STARTED Formatting Functions
+   #+begin_src lisp :exports results :session "doc"
+     (doc 'utilities.binary-dump:binary-dump 'function)
+   #+end_src
+
+   #+RESULTS:
+   #+begin_example
+   binary-dump DATA &KEY (START 0) (END (LENGTH DATA)) STREAM (WIDTH
+                                                               (%STREAM-REMAINING-COLUMNS
+                                                                STREAM)) OFFSET-BASE (LENGTH
+                                                                                      8) (ENDIAN
+                                                                                          LITTLE) (TYPE
+                                                                                                   'UNSIGNED-BYTE) (BASE
+                                                                                                                    *PRINT-BASE*) PRINT-TYPE
+
+   Print DATA to STREAM as a binary, octal, decimal, hexadecimal,
+   etc. dump of the form
+
+   [OFFSET ]B₁ B₂ B₃ ... S₁S₂S₃ ...
+   ...
+
+   where OFFSET - the offset of B₁ printed in base OFFSET-BASE - is
+   only printed when the OFFSET-BASE is an integer designating a base.
+
+   B₁, B₂, ... are the bytes (or larger units according to LENGTH) of
+   DATA printed in base BASE. LENGTH, ENDIAN and TYPE characterize the
+   length, type and decoding of units:
+
+   LENGTH is either 8, 16, 32 or 64 if TYPE is [UN]SIGNED-BYTE and
+   either 32 or 64 if TYPE is FLOAT.
+
+   ENDIAN is either :LITTLE or :BIG and only matters if LENGTH is
+   not 8.
+
+   TYPE is one of [UN]SIGNED-BYTE and FLOAT.
+
+   The default behavior is formatting unsigned byte units in base
+   *PRINT-BASE*.
+
+   S₁S₂... is the part of DATA which corresponds to B₁ B₂ ... rendered
+   as string. In S₁S₂..., unprintable and whitespace characters are
+   replaced with ".".
+
+   If START and/or END are supplied, the subsequence of DATA bounded
+   by START and END instead of all of DATA is processed.
+
+   When PRINT-TYPE is true, the output is preceded by a line of the
+   form
+
+   N-byte TYPE
+
+   where TYPE is the type of DATA.
+
+   Depending on the length of DATA and WIDTH, the printed
+   representation can span multiple lines.
+#+end_example
+
+   #+begin_src lisp :exports results :session "doc"
+     (doc 'utilities.binary-dump:print-binary-dump 'function)
+   #+end_src
+
+   #+RESULTS:
+   #+begin_example
+   print-binary-dump STREAM DATA &OPTIONAL COLON? AT? WIDTH START END
+
+   Print DATA to STREAM as a binary, octal, decimal, hexadecimal,
+   etc. dump of the form
+
+   [OFFSET ]B₁ B₂ B₃ ... S₁S₂S₃ ...
+   ...
+
+   For details, see `binary-dump'. This function is designed for use
+   in ~/ format directives.
+#+end_example
+
+
+* Settings                                                         :noexport:
+
+#+OPTIONS: H:2 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS: TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
