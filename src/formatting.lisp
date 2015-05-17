@@ -50,7 +50,11 @@
       (setf (find-unit-formatter width endian type base)
             (make-unit-formatter width endian type base))))
 
+;;; Chunk printers
 ;;;
+;;; `print-chunk/numeric' and `print-chunk/string' print a numeric and
+;;; string representation respectively of one chunk of the data on a
+;;; single output line.
 
 (defun print-chunk/numeric (data start end shortened?
                             length endian type base
@@ -106,7 +110,6 @@
                      offset-base
                      length endian type base
                      print-type)
-  ;; offset-width was (ceiling (integer-length (1- end)) 4)
   (let+ (((&optional formatter/offset width/offset)
           (when offset-base
             (ensure-unit-formatter
@@ -155,6 +158,8 @@
            (unless last-chunk?
              (pprint-newline :mandatory stream))))
        data chunk-length :start start :end end))))
+
+;;; API
 
 (defun binary-dump (data
                     &key

@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the utilities.binary-dump system.
 ;;;;
-;;;; Copyright (C) 2014 Jan Moringen
+;;;; Copyright (C) 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -22,4 +22,11 @@
    #:print-binary-dump)
 
   (:documentation
-   "TODO"))
+   "This package contains functions for printing binary data.
+
+    The formatting possibilities resemble some of the ways supported
+    by the od(1) UNIX program.
+
+    The functions `binary-dump' and `print-binary-dump' constitute the
+    API. The former is intended to be called directly while the latter
+    is intended for use in ~/ `cl:format' directives."))
