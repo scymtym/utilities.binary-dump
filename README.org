@@ -8,6 +8,10 @@
 * Introduction
   The =utilities.binary-dump= system provides functions for formatting
   binary data in some of the ways supported by the od(1) UNIX program.
+
+  #+ATTR_HTML: :alt "build status image" :title Build Status :align right
+  [[https://travis-ci.org/scymtym/utilities.binary-dump][https://travis-ci.org/scymtym/utilities.binary-dump.svg]]
+
 * STARTED Tutorial
   #+begin_src lisp :results none :exports none :session "doc"
     (ql:quickload '(:utilities.binary-dump :alexandria :split-sequence))

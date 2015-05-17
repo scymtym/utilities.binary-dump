@@ -31,7 +31,9 @@
   "Root unit test suite for the utilities.binary-dump system.")
 
 (defun run-tests ()
-  (run! :utilities.binary-dump))
+  (let ((results (run :utilities.binary-dump)))
+    (explain! results)
+    (results-status results)))
 
 ;;; Test utilities
 
