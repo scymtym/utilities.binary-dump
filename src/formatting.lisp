@@ -231,7 +231,9 @@
                   print-type))
   data)
 
-(defun print-binary-dump (stream data &optional colon? at? width start end)
+(defun print-binary-dump (stream data
+                          &optional
+                          colon? at? width start end (base *print-base*))
   "Print DATA to STREAM as a binary, octal, decimal, hexadecimal,
    etc. dump of the form
 
@@ -243,7 +245,8 @@
   (binary-dump data :start (or start 0) :end (or end (length data))
                :stream      stream
                :width       (or width (%stream-remaining-columns stream))
-               :offset-base (when colon? 16) ; *print-base* instead of 16?
+               :offset-base (when colon? base)
+               :base        base
                :print-type  at?))
 
 
