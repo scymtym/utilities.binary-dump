@@ -32,21 +32,22 @@
   "Smoke test for the `map-chunks' function."
 
   (mapc
-   (lambda+ ((data length expected))
+   (lambda+ ((data length args expected))
      (let+ ((chunks '())
             ((&flet collect (&rest args)
                (push args chunks))))
-       (map-chunks #'collect data length)
+       (apply #'map-chunks #'collect data length args)
        (is (equal expected (reverse chunks)))))
 
-   `((,*octets-1* 1 ((0 ,*octets-1* 0 1 nil)
-                     (1 ,*octets-1* 1 2 nil)
-                     (2 ,*octets-1* 2 3 nil)
-                     (3 ,*octets-1* 3 4 t)))
-     (,*octets-1* 2 ((0 ,*octets-1* 0 2 nil)
-                     (2 ,*octets-1* 2 4 t)))
-     (,*octets-1* 4 ((0 ,*octets-1* 0 4 t)))
-     (,*octets-1* 8 ((0 ,*octets-1* 0 4 t))))))
+   `((,*octets-1* 1 ()              ((0 ,*octets-1* 0 1 nil)
+                                     (1 ,*octets-1* 1 2 nil)
+                                     (2 ,*octets-1* 2 3 nil)
+                                     (3 ,*octets-1* 3 4 t)))
+     (,*octets-1* 2 ()              ((0 ,*octets-1* 0 2 nil)
+                                     (2 ,*octets-1* 2 4 t)))
+     (,*octets-1* 4 ()              ((0 ,*octets-1* 0 4 t)))
+     (,*octets-1* 8 ()              ((0 ,*octets-1* 0 4 t)))
+     (,*octets-1* 1 (:max-chunks 1) ((0 ,*octets-1* 0 1 t))))))
 
 (macrolet
     ((define-conditions-case (function &rest required-args)

@@ -106,7 +106,7 @@
       ;; formatting all numeric parts on one line.
       (max 0 (1- (* unit-width count)))))
 
-(defun %binary-dump (data start end stream width shortened?
+(defun %binary-dump (data start end stream width lines shortened?
                      offset-base
                      length endian type base
                      print-type)
@@ -157,17 +157,18 @@
            ;; Newline
            (unless last-chunk?
              (pprint-newline :mandatory stream))))
-       data chunk-length :start start :end end))))
+       data chunk-length :start start :end end :max-chunks lines))))
 
 ;;; API
 
 (defun binary-dump (data
                     &key
                     (start      0)
-                    (end        (length data))
+                    (end        (length data)                      end-supplied?)
 
                     stream
                     (width      (%stream-remaining-columns stream))
+                    (lines      *print-lines*)
 
                     offset-base
 
@@ -184,7 +185,7 @@
      ...
 
    where OFFSET - the offset of B₁ printed in base OFFSET-BASE - is
-   only printed when the OFFSET-BASE is an integer designating a base.
+   only printed when OFFSET-BASE is an integer designating a base.
 
    B₁, B₂, ... are the bytes (or larger units according to LENGTH) of
    DATA printed in base BASE. LENGTH, ENDIAN and TYPE characterize the
@@ -202,11 +203,16 @@
    *PRINT-BASE*.
 
    S₁S₂... is the part of DATA which corresponds to B₁ B₂ ... rendered
-   as string. In S₁S₂..., unprintable and whitespace characters are
+   as a string. In S₁S₂..., unprintable and whitespace characters are
    replaced with \".\".
 
    If START and/or END are supplied, the subsequence of DATA bounded
    by START and END instead of all of DATA is processed.
+
+    Additionally, if LINES is non-nil (either the keyword argument is
+   supplied or its default value, the value of `*print-lines*' is
+   non-nil), the output is limited to LINES lines. Supplying :lines
+   nil removes this limitation, even if `*print-lines*' is non-nil.
 
    When PRINT-TYPE is true, the output is preceded by a line of the
    form
@@ -217,15 +223,19 @@
 
    Depending on the length of DATA and WIDTH, the printed
    representation can span multiple lines."
-  (let* ((stream     (case stream
-                       ((nil) *standard-output*)
-                       ((t)   *terminal-io*)
-                       (t     stream)))
-         (end*       (if *print-length* ; TODO allow overriding this?
-                         (min (+ start *print-length*) end)
-                         end))
-         (shortened? (< end* end)))
-    (%binary-dump data start end* stream width shortened?
+  (let+ ((stream (case stream
+                   ((nil) *standard-output*)
+                   ((t)   *terminal-io*)
+                   (t     stream)))
+         ((&values end* shortened?)
+          (cond
+            ((and (not end-supplied?) *print-length*)
+             (let ((end* (min (+ start *print-length*) end)))
+               (values end* (< end* end))))
+            (end)
+            (t
+             (length data)))))
+    (%binary-dump data start end* stream width lines shortened?
                   offset-base
                   length endian type base
                   print-type))

@@ -71,4 +71,6 @@
      (,*octets-1* (:width  8 :base 16 :offset-base 16) "0 01 .
                                                         1 0F .
                                                         2 FF .
-                                                        3 41 A "))))
+                                                        3 41 A ")
+     ;; Line limit
+     (,*octets-1* (:width  8 :lines 1)                 "001  .   "))))

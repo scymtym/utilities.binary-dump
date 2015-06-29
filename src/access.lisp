@@ -73,11 +73,16 @@
     data))
 
 (declaim (ftype (function (t sequence positive-integer
-                           &key (:start non-negative-integer)
-                                (:end   non-negative-integer))
+                           &key (:start      non-negative-integer)
+                                (:end        non-negative-integer)
+                                (:max-chunks non-negative-integer))
                           sequence)
                 map-chunks))
-(defun map-chunks (function data chunk-length &key (start 0) (end (length data)))
+(defun map-chunks (function data chunk-length
+                   &key
+                   (start     0)
+                   (end       (length data))
+                   max-chunks)
   "Call FUNCTION with subsequent chunks of CHUNK-LENGTH octets of DATA.
 
    FUNCTION has to have a lambda-list compatible to the following one:
@@ -105,7 +110,10 @@
     (error "~@<Bounding indices ~D and ~D are invalid for ~S.~@:>"
            start end data))
 
-  (let ((function (coerce function 'function)))
+  (let ((function (coerce function 'function))
+        (end      (if max-chunks
+                      (min end (* chunk-length max-chunks))
+                      end)))
     (loop :for offset :from start :below end :by chunk-length :do
        (let* ((last-chunk? (>= (+ offset chunk-length) end))
               (start       offset)
