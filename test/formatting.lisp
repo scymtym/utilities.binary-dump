@@ -72,5 +72,8 @@
                                                         1 0F .
                                                         2 FF .
                                                         3 41 A ")
+     ;; Sequence limits
+     (,*octets-1* (:width 16 :start 1)                 "017 377 101  ..A ")
+     (,*octets-1* (:width 16 :end 1)                   "001          .   ")
      ;; Line limit
      (,*octets-1* (:width  8 :lines 1)                 "001  .   "))))
