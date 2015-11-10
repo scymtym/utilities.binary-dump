@@ -114,9 +114,10 @@
         (end      (if max-chunks
                       (min end (* chunk-length max-chunks))
                       end)))
-    (loop :for offset :from start :below end :by chunk-length :do
-       (let* ((last-chunk? (>= (+ offset chunk-length) end))
-              (start       offset)
-              (end         (min end (+ offset chunk-length))))
-         (funcall function offset data start end last-chunk?)))
-    data))
+    (loop :for offset :from start :below end :by chunk-length
+          :for count :from 1 :do
+             (let* ((last-chunk? (>= (+ offset chunk-length) end))
+                    (start       offset)
+                    (end         (min end (+ offset chunk-length))))
+               (funcall function offset data start end last-chunk?))
+          :finally (return (values data start (min end offset) count)))))

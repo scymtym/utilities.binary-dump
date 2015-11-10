@@ -136,28 +136,32 @@
              width
              (list :length length :endian endian :type type :base base)))
 
-    (pprint-logical-block (stream (list data))
-      (when print-type
-        (format stream "~:D-byte ~S~:@_" (length data) (type-of data)))
-      (map-chunks
-       (lambda (offset data start end last-chunk?)
-         (let ((chunk-shortened? (and shortened? last-chunk?)))
-           ;; Offset
-           (when offset-base
-             (funcall formatter/offset stream offset)
-             (write-char #\Space stream))
-           ;; Numeric
-           (print-chunk/numeric data start end chunk-shortened?
-                                length endian type base
-                                stream width/numeric formatter/unit)
-           (write-char #\Space stream)
-           ;; String
-           (print-chunk/string data start end chunk-shortened?
-                               stream width/string)
-           ;; Newline
-           (unless last-chunk?
-             (pprint-newline :mandatory stream))))
-       data chunk-length :start start :end end :max-chunks lines))))
+    (let ((values))
+      (pprint-logical-block (stream (list data))
+        (when print-type
+          (format stream "~:D-byte ~S~:@_" (length data) (type-of data)))
+        (setf values
+              (multiple-value-list
+               (map-chunks
+                (lambda (offset data start end last-chunk?)
+                  (let ((chunk-shortened? (and shortened? last-chunk?)))
+                    ;; Offset
+                    (when offset-base
+                      (funcall formatter/offset stream offset)
+                      (write-char #\Space stream))
+                    ;; Numeric
+                    (print-chunk/numeric data start end chunk-shortened?
+                                         length endian type base
+                                         stream width/numeric formatter/unit)
+                    (write-char #\Space stream)
+                    ;; String
+                    (print-chunk/string data start end chunk-shortened?
+                                        stream width/string)
+                    ;; Newline
+                    (unless last-chunk?
+                      (pprint-newline :mandatory stream))))
+                data chunk-length :start start :end end :max-chunks lines))))
+      (apply #'values values))))
 
 ;;; API
 
@@ -238,8 +242,7 @@
     (%binary-dump data start end* stream width lines shortened?
                   offset-base
                   length endian type base
-                  print-type))
-  data)
+                  print-type)))
 
 (defun print-binary-dump (stream data
                           &optional
