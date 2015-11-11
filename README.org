@@ -36,12 +36,12 @@
   #+end_src
 
   #+RESULTS:
-  : 00 6A 6F 16 97 76 9B E7 35 9A 79 01 E1 A2 8E A1 9A 85 jo..v..5.y.......
-  : 11 E6 2C 41 4B 79 53 AD 70 69 0C 62 5A 3E 48 A9 C5 DB .,AKyS.pi.bZ>H...
-  : 22 BB 8C 3C 23 F0 9C 40 81 6E CF 9D 4C 3E DE B2 2F 6E ..<#..@.n..L>../n
-  : 33 AD 1B 56 D6 7F 3B 12 42 3B D4 A5 CF F1 5A EF 5B 49 ..V..;.B;....Z.[I
-  : 44 E2 EA 3A D7 66 C0 93 90 2B 08 DC 6F 12 2B A9 F6 34 ..:.f...+..o.+..4
-  : 55 F3 40 C0 7D 8B C6 CD BA 5A 9C 6C 0E AD 31 ..       .@.}....Z.l..1.
+  : 00 F2 34 FB 3D F5 49 5E 6F FB 72 7B 47 7E 56 03 AD B6 .4.=.I^o.r{G~V...
+  : 11 AE E0 C3 86 C4 E6 FC 5C 19 0F B7 63 6E C2 E5 1E 87 .......\...cn....
+  : 22 55 66 A4 39 E7 E4 11 EF AD 7B D3 6D 47 A5 A6 C7 5A Uf.9.....{.mG...Z
+  : 33 83 1C D8 01 FD 3F EE 29 A6 42 BF 74 8D 64 67 C5 4A .....?.).B.t.dg.J
+  : 44 F4 7E EB BF 37 3D 44 89 3C A3 D2 BC 09 1A D9 3B E2 .~..7=D.<......;.
+  : 55 0C C0 5E FE 2F F6 11 93 24 09 6B 0D 09 02 ..       ..^./...$.k....
 
 * STARTED Dictionary
   #+begin_src lisp :results none :exports none :session "doc"
@@ -51,7 +51,8 @@
              (string      (documentation symbol kind))
              (lines       (split-sequence:split-sequence #\Newline string))
              (trimmed     (mapcar (alexandria:curry #'string-left-trim '(#\Space)) lines)))
-        (format nil "~(~A~) ~{~A~^ ~}~2%~{~A~^~%~}" symbol lambda-list trimmed)))
+        (format nil "~(~A~) ~<~{~A~^ ~}~:@>~2%~{~A~^~%~}"
+                symbol (list lambda-list) trimmed)))
   #+end_src
 
 ** STARTED Access Functions
@@ -63,7 +64,7 @@
    #+begin_example
    map-units FUNCTION DATA LENGTH ENDIAN TYPE &KEY (START 0) (END (LENGTH DATA))
 
-   Call FUNCTION on subsequent "units" in DATA.
+   Call FUNCTION on subsequent "units" in DATA, return DATA.
 
    Units are subsequences characterized by and interpreted according
    to LENGTH, ENDIAN and TYPE:
@@ -87,8 +88,13 @@
    #+RESULTS:
    #+begin_example
    map-chunks FUNCTION DATA CHUNK-LENGTH &KEY (START 0) (END (LENGTH DATA))
+              MAX-CHUNKS
 
    Call FUNCTION with subsequent chunks of CHUNK-LENGTH octets of DATA.
+
+   Return four values: 1) DATA 2) the start index of the processed
+   sub-sequence of DATA (i.e. START) 3) the corresponding end
+   index (not necessarily END) 4) the number of processed chunks.
 
    FUNCTION has to have a lambda-list compatible to the following one:
 
@@ -120,13 +126,10 @@
 
    #+RESULTS:
    #+begin_example
-   binary-dump DATA &KEY (START 0) (END (LENGTH DATA)) STREAM (WIDTH
-                                                               (%STREAM-REMAINING-COLUMNS
-                                                                STREAM)) OFFSET-BASE (LENGTH
-                                                                                      8) (ENDIAN
-                                                                                          LITTLE) (TYPE
-                                                                                                   'UNSIGNED-BYTE) (BASE
-                                                                                                                    *PRINT-BASE*) PRINT-TYPE
+   binary-dump DATA &KEY (START 0) (END (LENGTH DATA) END-SUPPLIED?) STREAM
+               (WIDTH (%STREAM-REMAINING-COLUMNS STREAM)) (LINES *PRINT-LINES*)
+               OFFSET-BASE (LENGTH 8) (ENDIAN LITTLE) (TYPE 'UNSIGNED-BYTE)
+               (BASE *PRINT-BASE*) PRINT-TYPE
 
    Print DATA to STREAM as a binary, octal, decimal, hexadecimal,
    etc. dump of the form
@@ -135,7 +138,7 @@
    ...
 
    where OFFSET - the offset of B₁ printed in base OFFSET-BASE - is
-   only printed when the OFFSET-BASE is an integer designating a base.
+   only printed when OFFSET-BASE is an integer designating a base.
 
    B₁, B₂, ... are the bytes (or larger units according to LENGTH) of
    DATA printed in base BASE. LENGTH, ENDIAN and TYPE characterize the
@@ -153,11 +156,20 @@
    *PRINT-BASE*.
 
    S₁S₂... is the part of DATA which corresponds to B₁ B₂ ... rendered
-   as string. In S₁S₂..., unprintable and whitespace characters are
+   as a string. In S₁S₂..., unprintable and whitespace characters are
    replaced with ".".
+
+   Return four values: 1) DATA 2) the start index of the processed
+   sub-sequence of DATA (i.e. START) 3) the corresponding end
+   index (not necessarily END) 4) the number of processed chunks.
 
    If START and/or END are supplied, the subsequence of DATA bounded
    by START and END instead of all of DATA is processed.
+
+   Additionally, if LINES is non-nil (either the keyword argument is
+   supplied or its default value, the value of `*print-lines*' is
+   non-nil), the output is limited to LINES lines. Supplying :lines
+   nil removes this limitation, even if `*print-lines*' is non-nil.
 
    When PRINT-TYPE is true, the output is preceded by a line of the
    form
@@ -177,6 +189,7 @@
    #+RESULTS:
    #+begin_example
    print-binary-dump STREAM DATA &OPTIONAL COLON? AT? WIDTH START END
+                     (BASE *PRINT-BASE*)
 
    Print DATA to STREAM as a binary, octal, decimal, hexadecimal,
    etc. dump of the form
