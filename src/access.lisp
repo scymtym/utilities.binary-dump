@@ -42,7 +42,7 @@
                 map-units))
 (defun map-units (function data length endian type
                   &key (start 0) (end (length data)))
-  "Call FUNCTION on subsequent \"units\" in DATA.
+  "Call FUNCTION on subsequent \"units\" in DATA, return DATA.
 
    Units are subsequences characterized by and interpreted according
    to LENGTH, ENDIAN and TYPE:
@@ -84,6 +84,10 @@
                    (end       (length data))
                    max-chunks)
   "Call FUNCTION with subsequent chunks of CHUNK-LENGTH octets of DATA.
+
+   Return four values: 1) DATA 2) the start index of the processed
+   sub-sequence of DATA (i.e. START) 3) the corresponding end
+   index (not necessarily END) 4) the number of processed chunks.
 
    FUNCTION has to have a lambda-list compatible to the following one:
 

@@ -210,10 +210,14 @@
    as a string. In S₁S₂..., unprintable and whitespace characters are
    replaced with \".\".
 
+   Return four values: 1) DATA 2) the start index of the processed
+   sub-sequence of DATA (i.e. START) 3) the corresponding end
+   index (not necessarily END) 4) the number of processed chunks.
+
    If START and/or END are supplied, the subsequence of DATA bounded
    by START and END instead of all of DATA is processed.
 
-    Additionally, if LINES is non-nil (either the keyword argument is
+   Additionally, if LINES is non-nil (either the keyword argument is
    supplied or its default value, the value of `*print-lines*' is
    non-nil), the output is limited to LINES lines. Supplying :lines
    nil removes this limitation, even if `*print-lines*' is non-nil.
