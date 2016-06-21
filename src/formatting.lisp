@@ -1,6 +1,6 @@
 ;;;; formatting.lisp --- Formatting of binary data.
 ;;;;
-;;;; Copyright (C) 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -259,12 +259,15 @@
 
    For details, see `binary-dump'. This function is designed for use
    in ~/ format directives."
-  (binary-dump data :start (or start 0) :end (or end (length data))
-               :stream      stream
-               :width       (or width (%stream-remaining-columns stream))
-               :offset-base (when colon? base)
-               :base        base
-               :print-type  at?))
+  (apply #'binary-dump data
+         :stream      stream
+         :width       (or width (%stream-remaining-columns stream))
+         :offset-base (when colon? base)
+         :base        base
+         :print-type  at?
+         :start       (or start 0)
+         (when end
+           (list :end end))))
 
 
 ;; Local Variables:

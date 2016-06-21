@@ -117,12 +117,13 @@
   "Smoke test for the `print-binary-dump' function."
 
   (mapc
-   (lambda+ ((data format-control expected/raw))
+   (lambda+ ((data format-control bindings expected/raw))
      (let+ (((&flet dump (stream)
                (let ((*print-pretty* t)
                      (*print-base*   8)
                      (*print-case*   :downcase)) ; for hexadecimal cases
-                 (format stream format-control data))))
+                 (progv (mapcar #'first bindings) (mapcar #'second bindings)
+                   (format stream format-control data)))))
             ((&flet dump-string ()
                (with-output-to-string (stream)
                  (dump stream))))
@@ -143,6 +144,7 @@
    `(;; Default base (set to 8 via `*print-base*' binding above)
      (,*octets-1*
       "~8/utilities.binary-dump:print-binary-dump/"
+      ()
       "001  .
        017  .
        377  .
@@ -150,16 +152,19 @@
 
      (,*octets-1*
       "~16/utilities.binary-dump:print-binary-dump/"
+      ()
       "001 017 377  ...
        101          A   ")
 
      (,*octets-1*
       "~24/utilities.binary-dump:print-binary-dump/"
+      ()
       "001 017 377 101  ...A    ")
 
      ;; Base 10
      (,*octets-1*
       "~8,,,10/utilities.binary-dump:print-binary-dump/"
+      ()
       "001  .
        015  .
        255  .
@@ -167,16 +172,19 @@
 
      (,*octets-1*
       "~16,,,10/utilities.binary-dump:print-binary-dump/"
+      ()
       "001 015 255  ...
        065          A   ")
 
      (,*octets-1*
       "~24,,,10/utilities.binary-dump:print-binary-dump/"
+      ()
       "001 015 255 065  ...A    ")
 
      ;; Base 16
      (,*octets-1*
       "~8,,,16/utilities.binary-dump:print-binary-dump/"
+      ()
       "01 .
        0F .
        FF .
@@ -184,16 +192,19 @@
 
      (,*octets-1*
       "~16,,,16/utilities.binary-dump:print-binary-dump/"
+      ()
       "01 0F FF ...
        41       A      ")
 
      (,*octets-1*
       "~24,,,16/utilities.binary-dump:print-binary-dump/"
+      ()
       "01 0F FF 41    ...A     ")
 
      ;; Offsets
      (,*octets-1*
       "~8,,,16:/utilities.binary-dump:print-binary-dump/"
+      ()
       "0 01 .
        1 0F .
        2 FF .
@@ -201,6 +212,7 @@
 
      (,*octets-1*
       "~9:/utilities.binary-dump:print-binary-dump/"
+      ()
       "0 001  .
        1 017  .
        2 377  .
@@ -209,8 +221,16 @@
      ;; Sequence limits
      (,*octets-1*
       "~16,1/utilities.binary-dump:print-binary-dump/"
+      ()
       "017 377 101  ..A ")
 
      (,*octets-1*
       "~16,,1/utilities.binary-dump:print-binary-dump/"
-      "001          .   "))))
+      ()
+      "001          .   ")
+
+     ;; *print-length*
+     (,*octets-1*
+      "~16/utilities.binary-dump:print-binary-dump/"
+      ((*print-length* 3))
+      "001 017 ..  ... "))))
