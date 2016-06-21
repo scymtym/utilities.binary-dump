@@ -134,6 +134,7 @@
    Print DATA to STREAM as a binary, octal, decimal, hexadecimal,
    etc. dump of the form
 
+   [HEADER]
    [OFFSET ]B₁ B₂ B₃ ... S₁S₂S₃ ...
    ...
 
@@ -194,11 +195,28 @@
    Print DATA to STREAM as a binary, octal, decimal, hexadecimal,
    etc. dump of the form
 
+   [HEADER]
    [OFFSET ]B₁ B₂ B₃ ... S₁S₂S₃ ...
    ...
 
-   For details, see `binary-dump'. This function is designed for use
-   in ~/ format directives.
+   COLON? controls whether the offset column is printed (the
+   corresponding `binary-dump' keyword parameter is `offset-base').
+
+   AT? controls whether the header is printed (the corresponding
+   `binary-dump' keyword parameter is `print-type').
+
+   WIDTH specifies the maximum number of columns a line of output
+   should occupy.
+
+   START and END can be used to restrict processing to a subsequence
+   of DATA.
+
+   BASE controls the radix in which numbers in the offset column (if
+   any) and the numeric data columns are printed.
+
+   For more details, see `binary-dump'.
+
+   This function is designed for use in ~/ format directives.
 #+end_example
 
 
