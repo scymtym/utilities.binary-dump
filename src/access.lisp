@@ -1,6 +1,6 @@
 ;;;; access.lisp --- Access to binary data.
 ;;;;
-;;;; Copyright (C) 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -63,7 +63,7 @@
     (error "~@<Bounding indices ~D and ~D are invalid for ~S.~@:>"
            start end data))
 
-  (let ((function (coerce function 'function))
+  (let ((function (ensure-function function))
         (accessor (find-unit-accessor length endian type))
         (step     (floor length 8))) ; number of octets in a unit
     (loop :for offset :from start :below end :by step :do
@@ -114,7 +114,7 @@
     (error "~@<Bounding indices ~D and ~D are invalid for ~S.~@:>"
            start end data))
 
-  (let ((function (coerce function 'function))
+  (let ((function (ensure-function function))
         (end      (if max-chunks
                       (min end (* chunk-length max-chunks))
                       end)))
