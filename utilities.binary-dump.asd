@@ -1,6 +1,6 @@
 ;;;; utilities.binary-dump.asd --- System definition for utilities.binary-dump.
 ;;;;
-;;;; Copyright (C) 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -68,7 +68,7 @@
                 :let-plus
                 :nibbles
                 (:version :utilities.binary-dump #.(version/string))
-                (:version :fiveam                "1.1"))
+                (:version :fiveam                "1.3"))
   :encoding    :utf-8
   :components  ((:module     "test"
                  :serial     t

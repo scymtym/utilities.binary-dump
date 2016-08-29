@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for tests of the utilities.binary-dump system.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -31,9 +31,7 @@
   "Root unit test suite for the utilities.binary-dump system.")
 
 (defun run-tests ()
-  (let ((results (run :utilities.binary-dump)))
-    (explain! results)
-    (results-status results)))
+  (run! :utilities.binary-dump))
 
 ;;; Test utilities
 
