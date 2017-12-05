@@ -1,6 +1,6 @@
 ;;;; utilities.binary-dump.asd --- System definition for utilities.binary-dump.
 ;;;;
-;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2014, 2015, 2016, 2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -23,9 +23,9 @@
 
                 (:static-file "README.org"))
 
-  :in-order-to ((test-op (test-op :utilities.binary-dump-test))))
+  :in-order-to ((test-op (test-op :utilities.binary-dump/test))))
 
-(defsystem :utilities.binary-dump-test
+(defsystem :utilities.binary-dump/test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     (:read-file-form "version-string.sexp")
@@ -47,5 +47,5 @@
                               (:file       "formatting")))))
 
 (defmethod perform ((op        test-op)
-                    (component (eql (find-system :utilities.binary-dump-test))))
+                    (component (eql (find-system :utilities.binary-dump/test))))
   (uiop:symbol-call '#:utilities.binary-dump.test '#:run-tests))
