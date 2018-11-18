@@ -5,6 +5,9 @@
 #+KEYWORDS:    binary, hex, octal, dump, print, utilities, od
 #+LANGUAGE:    en
 
+#+OPTIONS: H:2 num:nil toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+SEQ_TODO: TODO STARTED | DONE
+
 * Introduction
   The =utilities.binary-dump= system provides functions for formatting
   binary data in some of the ways supported by the od(1) UNIX program.
@@ -218,9 +221,3 @@
 
    This function is designed for use in ~/ format directives.
 #+end_example
-
-
-* Settings                                                         :noexport:
-
-#+OPTIONS: H:2 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
-#+OPTIONS: TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
